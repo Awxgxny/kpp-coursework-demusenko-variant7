@@ -24,4 +24,13 @@
         <url-pattern>/api/sites</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>vehicles</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.VehicleServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>vehicles</servlet-name>
+        <url-pattern>/api/vehicles</url-pattern>
+    </servlet-mapping>
+
 </web-app>
