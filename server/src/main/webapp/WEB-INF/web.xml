@@ -33,4 +33,13 @@
         <url-pattern>/api/vehicles</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>requests</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.WasteRequestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>requests</servlet-name>
+        <url-pattern>/api/requests</url-pattern>
+    </servlet-mapping>
+
 </web-app>
