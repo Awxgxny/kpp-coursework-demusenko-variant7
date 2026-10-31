@@ -42,4 +42,13 @@
         <url-pattern>/api/requests</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>trips</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.TripServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>trips</servlet-name>
+        <url-pattern>/api/trips</url-pattern>
+    </servlet-mapping>
+
 </web-app>
