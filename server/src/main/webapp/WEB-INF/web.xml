@@ -15,4 +15,13 @@
         <url-pattern>/api/ping</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>sites</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.ContainerSiteServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>sites</servlet-name>
+        <url-pattern>/api/sites</url-pattern>
+    </servlet-mapping>
+
 </web-app>
