@@ -14,6 +14,15 @@ public final class DBUtil {
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
+    static {
+        // У Tomcat драйвер лежить у WEB-INF/lib, тому реєструємо його явно
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private DBUtil() {
     }
 
