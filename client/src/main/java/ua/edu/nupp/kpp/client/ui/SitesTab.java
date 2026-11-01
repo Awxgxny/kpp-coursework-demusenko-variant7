@@ -6,17 +6,24 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import ua.edu.nupp.kpp.client.ApiClient;
 import ua.edu.nupp.kpp.client.ApiException;
+import ua.edu.nupp.kpp.client.csv.CsvSiteReader;
 import ua.edu.nupp.kpp.client.model.ContainerSite;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-/** Вкладка «Майданчики»: CRUD контейнерних майданчиків. */
+/** Вкладка «Майданчики»: CRUD контейнерних майданчиків та початковий імпорт із CSV. */
 public class SitesTab extends Tab {
 
     private final ApiClient api;
@@ -71,8 +78,10 @@ public class SitesTab extends Tab {
         delete.setOnAction(e -> delete());
         Button refresh = new Button("Оновити");
         refresh.setOnAction(e -> refresh());
+        Button importCsv = new Button("Імпорт з CSV…");
+        importCsv.setOnAction(e -> importCsv());
 
-        HBox buttons = new HBox(8, add, update, delete, refresh);
+        HBox buttons = new HBox(8, add, update, delete, refresh, importCsv);
         buttons.setPadding(new Insets(8));
 
         VBox bottom = new VBox(form, buttons);
@@ -169,5 +178,58 @@ public class SitesTab extends Tab {
         } catch (ApiException e) {
             UiUtil.showError(e);
         }
+    }
+
+    // ---------------------------------------------------------------- імпорт CSV
+
+    private void importCsv() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Оберіть CSV-файл із майданчиками");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+        File dir = new File("sample-data"); // відносний шлях: папка запуску client/
+        if (dir.isDirectory()) {
+            chooser.setInitialDirectory(dir);
+        }
+        File file = chooser.showOpenDialog(getTabPane() == null ? null : getTabPane().getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        CsvSiteReader.Result parsed;
+        try {
+            parsed = new CsvSiteReader().read(file.toPath());
+        } catch (IOException e) {
+            UiUtil.showWarning("Не вдалося прочитати файл: " + e.getMessage());
+            return;
+        }
+
+        List<String> problems = new ArrayList<>(parsed.getErrors());
+        int imported = 0;
+        for (CsvSiteReader.Row row : parsed.getRows()) {
+            try {
+                api.addSite(row.getSite());
+                imported++;
+            } catch (ApiException e) {
+                problems.add("Рядок " + row.getLine() + ": " + e.getMessage());
+            }
+        }
+        refresh();
+        showImportReport(imported, problems);
+    }
+
+    private void showImportReport(int imported, List<String> problems) {
+        if (problems.isEmpty()) {
+            UiUtil.showInfo("Імпортовано майданчиків: " + imported);
+            return;
+        }
+        TextArea area = new TextArea("Імпортовано: " + imported + "\nПропущено: " + problems.size()
+                + "\n\n" + String.join("\n", problems));
+        area.setEditable(false);
+        area.setPrefSize(560, 260);
+        javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        a.setTitle("Результат імпорту");
+        a.setHeaderText(null);
+        a.getDialogPane().setContent(area);
+        a.showAndWait();
     }
 }
