@@ -7,6 +7,7 @@ import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import ua.edu.nupp.kpp.client.ui.RequestsTab;
 import ua.edu.nupp.kpp.client.ui.SitesTab;
+import ua.edu.nupp.kpp.client.ui.TripsTab;
 import ua.edu.nupp.kpp.client.ui.VehiclesTab;
 
 /** Головне вікно JavaFX-клієнта: чотири вкладки, що працюють із сервером через HTTP/JSON. */
@@ -20,19 +21,22 @@ public class MainApp extends Application {
         SitesTab sites = new SitesTab(api);
         RequestsTab requests = new RequestsTab(api);
         VehiclesTab vehicles = new VehiclesTab(api);
-        tabs.getTabs().addAll(sites, requests, vehicles);
+        TripsTab trips = new TripsTab(api);
+        tabs.getTabs().addAll(sites, requests, vehicles, trips);
 
         // при переході на вкладку дані оновлюються: списки залежать від інших вкладок
-        tabs.getSelectionModel().selectedItemProperty().addListener((o, old, tab) -> refresh(tab, requests));
+        tabs.getSelectionModel().selectedItemProperty().addListener((o, old, tab) -> refresh(tab, requests, trips));
 
         stage.setTitle("Заявки на вивезення відходів — сервер: " + api.getBaseUrl());
         stage.setScene(new Scene(tabs, 1050, 640));
         stage.show();
     }
 
-    private static void refresh(Tab tab, RequestsTab requests) {
+    private static void refresh(Tab tab, RequestsTab requests, TripsTab trips) {
         if (tab == requests) {
             requests.refresh();
+        } else if (tab == trips) {
+            trips.refresh();
         }
     }
 }
