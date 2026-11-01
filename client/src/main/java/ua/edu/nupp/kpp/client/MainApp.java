@@ -7,6 +7,7 @@ import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import ua.edu.nupp.kpp.client.ui.RequestsTab;
 import ua.edu.nupp.kpp.client.ui.SitesTab;
+import ua.edu.nupp.kpp.client.ui.VehiclesTab;
 
 /** Головне вікно JavaFX-клієнта: чотири вкладки, що працюють із сервером через HTTP/JSON. */
 public class MainApp extends Application {
@@ -18,7 +19,8 @@ public class MainApp extends Application {
         TabPane tabs = new TabPane();
         SitesTab sites = new SitesTab(api);
         RequestsTab requests = new RequestsTab(api);
-        tabs.getTabs().addAll(sites, requests);
+        VehiclesTab vehicles = new VehiclesTab(api);
+        tabs.getTabs().addAll(sites, requests, vehicles);
 
         // при переході на вкладку дані оновлюються: списки залежать від інших вкладок
         tabs.getSelectionModel().selectedItemProperty().addListener((o, old, tab) -> refresh(tab, requests));
