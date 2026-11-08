@@ -204,7 +204,7 @@ public class RequestsTab extends Tab {
     private WasteRequest selected() {
         WasteRequest r = table.getSelectionModel().getSelectedItem();
         if (r == null) {
-            UiUtil.showWarning("Оберіть заявку у таблиці");
+            UiUtil.showWarning("Виберіть запис");
         }
         return r;
     }

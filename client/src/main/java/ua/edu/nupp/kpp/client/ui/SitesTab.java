@@ -151,7 +151,7 @@ public class SitesTab extends Tab {
     private void update() {
         ContainerSite selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UiUtil.showWarning("Оберіть майданчик у таблиці");
+            UiUtil.showWarning("Виберіть запис");
             return;
         }
         try {
@@ -169,7 +169,7 @@ public class SitesTab extends Tab {
     private void delete() {
         ContainerSite selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UiUtil.showWarning("Оберіть майданчик у таблиці");
+            UiUtil.showWarning("Виберіть запис");
             return;
         }
         try {

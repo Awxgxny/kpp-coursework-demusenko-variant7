@@ -111,7 +111,7 @@ public class VehiclesTab extends Tab {
     private void update() {
         Vehicle selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UiUtil.showWarning("Оберіть транспортний засіб у таблиці");
+            UiUtil.showWarning("Виберіть запис");
             return;
         }
         try {
@@ -129,7 +129,7 @@ public class VehiclesTab extends Tab {
     private void delete() {
         Vehicle selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UiUtil.showWarning("Оберіть транспортний засіб у таблиці");
+            UiUtil.showWarning("Виберіть запис");
             return;
         }
         try {

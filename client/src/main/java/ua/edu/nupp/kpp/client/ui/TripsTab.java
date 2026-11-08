@@ -144,7 +144,7 @@ public class TripsTab extends Tab {
     private void update() {
         Trip selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UiUtil.showWarning("Оберіть виїзд у таблиці");
+            UiUtil.showWarning("Виберіть запис");
             return;
         }
         try {
@@ -162,7 +162,7 @@ public class TripsTab extends Tab {
     private void delete() {
         Trip selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UiUtil.showWarning("Оберіть виїзд у таблиці");
+            UiUtil.showWarning("Виберіть запис");
             return;
         }
         try {
