@@ -7,9 +7,9 @@ import java.io.IOException;
 /**
  * Транспортні засоби.
  *
- * GET  /api/vehicles         — список усіх транспортних засобів;
- * GET  /api/vehicles?id=N    — один транспортний засіб (404, якщо не знайдено);
- * POST /api/vehicles         — action=add | update | delete:
+ * GET  /vehicles         — список усіх транспортних засобів;
+ * GET  /vehicles?id=N    — один транспортний засіб (404, якщо не знайдено);
+ * POST /vehicles         — action=add | update | delete:
  *        add    — plateNumber, model, capacityM3, driverName;
  *        update — id та ті самі поля;
  *        delete — id.

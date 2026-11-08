@@ -8,9 +8,9 @@ import java.io.IOException;
  * Заявки на вивезення відходів (об'єкт життєвого циклу).
  * F1, F2, F3 та інтегральний показник I розраховує сервер; клієнт їх не передає.
  *
- * GET  /api/requests          — список усіх заявок (разом із f1, f2, f3, integralIndex, state);
- * GET  /api/requests?id=N     — одна заявка (404, якщо не знайдено);
- * POST /api/requests          — action=add | update | recalculate | changeState | delete:
+ * GET  /requests          — список усіх заявок (разом із f1, f2, f3, integralIndex, state);
+ * GET  /requests?id=N     — одна заявка (404, якщо не знайдено);
+ * POST /requests          — action=add | update | recalculate | changeState | delete:
  *        add         — containerSiteId, description, dueDate (рррр-мм-дд);
  *        update      — id, containerSiteId, description, dueDate;
  *        recalculate — id (перерахунок F1–F3 та I на поточну дату);

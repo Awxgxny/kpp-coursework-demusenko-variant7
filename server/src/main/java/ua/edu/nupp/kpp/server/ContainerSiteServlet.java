@@ -7,9 +7,9 @@ import java.io.IOException;
 /**
  * Контейнерні майданчики.
  *
- * GET  /api/sites            — список усіх майданчиків (JSON-масив);
- * GET  /api/sites?id=N       — один майданчик (404, якщо не знайдено);
- * POST /api/sites            — action=add | update | delete:
+ * GET  /sites            — список усіх майданчиків (JSON-масив);
+ * GET  /sites?id=N       — один майданчик (404, якщо не знайдено);
+ * POST /sites            — action=add | update | delete:
  *        add    — code, name, address, district, wasteType, containerCount, capacityL,
  *                 fillLevel, sanitaryRisk;
  *        update — id та ті самі поля;

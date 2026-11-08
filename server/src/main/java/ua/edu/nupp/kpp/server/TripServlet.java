@@ -7,9 +7,9 @@ import java.io.IOException;
 /**
  * Виїзди транспортних засобів.
  *
- * GET  /api/trips            — список усіх виїздів;
- * GET  /api/trips?id=N       — один виїзд (404, якщо не знайдено);
- * POST /api/trips            — action=add | update | delete:
+ * GET  /trips            — список усіх виїздів;
+ * GET  /trips?id=N       — один виїзд (404, якщо не знайдено);
+ * POST /trips            — action=add | update | delete:
  *        add    — requestId, vehicleId, tripDate (рррр-мм-дд), collectedVolumeM3, notes (необов'язково);
  *        update — id та ті самі поля;
  *        delete — id.

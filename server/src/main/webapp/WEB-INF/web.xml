@@ -12,7 +12,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>ping</servlet-name>
-        <url-pattern>/api/ping</url-pattern>
+        <url-pattern>/ping</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -21,7 +21,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>sites</servlet-name>
-        <url-pattern>/api/sites</url-pattern>
+        <url-pattern>/sites</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -30,7 +30,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>vehicles</servlet-name>
-        <url-pattern>/api/vehicles</url-pattern>
+        <url-pattern>/vehicles</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -39,7 +39,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>requests</servlet-name>
-        <url-pattern>/api/requests</url-pattern>
+        <url-pattern>/requests</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -48,7 +48,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>trips</servlet-name>
-        <url-pattern>/api/trips</url-pattern>
+        <url-pattern>/trips</url-pattern>
     </servlet-mapping>
 
 </web-app>
