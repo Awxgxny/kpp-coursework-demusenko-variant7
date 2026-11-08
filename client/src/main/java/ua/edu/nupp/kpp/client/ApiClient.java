@@ -29,11 +29,11 @@ import java.util.Map;
  * моделі за допомогою ObjectMapper. SQL та підключення до MySQL тут відсутні.
  *
  * Адреса сервера береться з системної властивості kpp.server.url
- * (за замовчуванням http://localhost:8080/kpp-server/api).
+ * (за замовчуванням http://localhost:8080/kpp-server).
  */
 public class ApiClient {
 
-    public static final String DEFAULT_BASE_URL = "http://localhost:8080/kpp-server/api";
+    public static final String DEFAULT_BASE_URL = "http://localhost:8080/kpp-server";
 
     private final String baseUrl;
     private final HttpClient http = HttpClient.newBuilder()
