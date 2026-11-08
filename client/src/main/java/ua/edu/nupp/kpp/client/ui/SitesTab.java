@@ -186,9 +186,11 @@ public class SitesTab extends Tab {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Оберіть CSV-файл із майданчиками");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
-        File dir = new File("sample-data"); // відносний шлях: папка запуску client/
+        // відносний шлях sample-data/container_sites.csv: програму запускають з каталогу client/
+        File dir = CsvSiteReader.DEFAULT_FILE.getParent().toFile();
         if (dir.isDirectory()) {
             chooser.setInitialDirectory(dir);
+            chooser.setInitialFileName(CsvSiteReader.DEFAULT_FILE.getFileName().toString());
         }
         File file = chooser.showOpenDialog(getTabPane() == null ? null : getTabPane().getScene().getWindow());
         if (file == null) {

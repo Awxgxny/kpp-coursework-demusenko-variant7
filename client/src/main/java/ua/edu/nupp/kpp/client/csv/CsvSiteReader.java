@@ -23,6 +23,9 @@ public class CsvSiteReader {
     public static final String DELIMITER = ";";
     public static final int COLUMNS = 9;
 
+    /** Файл за замовчуванням: відносний шлях від каталогу запуску клієнта (client/). */
+    public static final Path DEFAULT_FILE = Path.of("sample-data", "container_sites.csv");
+
     /** Результат читання: коректні за форматом рядки та повідомлення про помилкові. */
     public static class Result {
         private final List<Row> rows = new ArrayList<>();
