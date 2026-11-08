@@ -23,8 +23,8 @@ import java.util.logging.Logger;
  * у HTTP-коди. SQL і предметної логіки тут немає: уся робота виконується в Service.
  *
  * Успішна відповідь: код 200 і JSON-тіло. Помилка: JSON {"error": "повідомлення"}
- * з кодом 400 (некоректні дані), 404 (не знайдено), 409 (порушення цілісності БД)
- * або 500 (внутрішня помилка).
+ * з кодом 400 (вхідні та предметні помилки, зокрема порушення цілісності БД),
+ * 404 (запис не знайдено під час GET ?id=) або 500 (непередбачена серверна помилка).
  */
 public abstract class ApiServlet extends HttpServlet {
 
@@ -71,8 +71,8 @@ public abstract class ApiServlet extends HttpServlet {
             writeError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (SQLException e) {
             if (e.getSQLState() != null && e.getSQLState().startsWith("23")) {
-                LOG.warning(req.getMethod() + " " + req.getRequestURI() + " -> 409: " + e.getMessage());
-                writeError(resp, HttpServletResponse.SC_CONFLICT, integrityMessage(e));
+                LOG.warning(req.getMethod() + " " + req.getRequestURI() + " -> 400: " + e.getMessage());
+                writeError(resp, HttpServletResponse.SC_BAD_REQUEST, integrityMessage(e));
             } else {
                 LOG.log(Level.SEVERE, "Помилка доступу до бази даних", e);
                 writeError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
