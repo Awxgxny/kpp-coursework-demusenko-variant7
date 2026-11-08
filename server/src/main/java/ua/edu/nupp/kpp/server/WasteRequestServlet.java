@@ -10,11 +10,11 @@ import java.io.IOException;
  *
  * GET  /requests          — список усіх заявок (разом із f1, f2, f3, integralIndex, state);
  * GET  /requests?id=N     — одна заявка (404, якщо не знайдено);
- * POST /requests          — action=add | update | recalculate | changeState | delete:
+ * POST /requests          — action=add | update | recalculate | transition | delete:
  *        add         — containerSiteId, description, dueDate (рррр-мм-дд);
  *        update      — id, containerSiteId, description, dueDate;
  *        recalculate — id (перерахунок F1–F3 та I на поточну дату);
- *        changeState — id, state (CREATED | PLANNED | IN_PROGRESS | DONE);
+ *        transition  — id, state (CREATED | PLANNED | IN_PROGRESS | DONE);
  *        delete      — id.
  */
 public class WasteRequestServlet extends ApiServlet {
@@ -51,7 +51,8 @@ public class WasteRequestServlet extends ApiServlet {
                 case "recalculate":
                     service.recalculate(longParam(req, "id"));
                     return ok();
-                case "changeState":
+                case "transition":
+                case "changeState": // стара назва дії, залишена для сумісності
                     service.changeState(longParam(req, "id"), stateParam(req));
                     return ok();
                 case "delete":

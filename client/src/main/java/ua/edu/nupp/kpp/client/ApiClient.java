@@ -157,7 +157,7 @@ public class ApiClient {
 
     /** Допустимість переходу перевіряє сервер; у разі заборони буде ApiException. */
     public void changeRequestState(long id, RequestState state) throws ApiException {
-        post("/requests", params("action", "changeState", "id", String.valueOf(id), "state", state.name()));
+        post("/requests", params("action", "transition", "id", String.valueOf(id), "state", state.name()));
     }
 
     public void deleteRequest(long id) throws ApiException {
