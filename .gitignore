@@ -1,8 +1,10 @@
 target/
 **/target/
 .idea/
+.vscode/
 *.iml
 out/
 *.log
+*.war
 .env
 application-local.properties
