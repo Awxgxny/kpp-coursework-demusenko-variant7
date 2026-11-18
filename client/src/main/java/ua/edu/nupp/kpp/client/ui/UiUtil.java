@@ -21,7 +21,11 @@ final class UiUtil {
     }
 
     static void showError(ApiException e) {
-        show(Alert.AlertType.ERROR, "Помилка", e.getMessage());
+        showError(e.getMessage());
+    }
+
+    static void showError(String message) {
+        show(Alert.AlertType.ERROR, "Помилка", message);
     }
 
     static void showWarning(String message) {

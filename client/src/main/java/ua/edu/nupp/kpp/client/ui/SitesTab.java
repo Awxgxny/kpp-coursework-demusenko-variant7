@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -16,15 +17,20 @@ import javafx.stage.FileChooser;
 import ua.edu.nupp.kpp.client.ApiClient;
 import ua.edu.nupp.kpp.client.ApiException;
 import ua.edu.nupp.kpp.client.csv.CsvSiteReader;
+import ua.edu.nupp.kpp.client.csv.ImportSitesTask;
 import ua.edu.nupp.kpp.client.model.ContainerSite;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/** Вкладка «Майданчики»: CRUD контейнерних майданчиків та початковий імпорт із CSV. */
+/** Вкладка «Майданчики»: CRUD контейнерних майданчиків та фоновий імпорт із CSV. */
 public class SitesTab extends Tab {
+
+    private static final Logger LOG = Logger.getLogger(SitesTab.class.getName());
 
     private final ApiClient api;
     private final TableView<ContainerSite> table = new TableView<>();
@@ -38,6 +44,13 @@ public class SitesTab extends Tab {
     private final TextField capacityL = new TextField();
     private final TextField fillLevel = new TextField();
     private final TextField sanitaryRisk = new TextField();
+
+    // керування імпортом CSV
+    private final TextField csvPath = new TextField(CsvSiteReader.DEFAULT_FILE.toString());
+    private final Button browseCsv = new Button("Огляд…");
+    private final Button importCsv = new Button("Імпортувати CSV");
+    private final ProgressBar progress = new ProgressBar(0);
+    private final Label status = new Label("CSV не імпортовано");
 
     public SitesTab(ApiClient api) {
         super("Майданчики");
@@ -78,13 +91,20 @@ public class SitesTab extends Tab {
         delete.setOnAction(e -> delete());
         Button refresh = new Button("Оновити");
         refresh.setOnAction(e -> refresh());
-        Button importCsv = new Button("Імпорт з CSV…");
-        importCsv.setOnAction(e -> importCsv());
 
-        HBox buttons = new HBox(8, add, update, delete, refresh, importCsv);
+        HBox buttons = new HBox(8, add, update, delete, refresh);
         buttons.setPadding(new Insets(8));
 
-        VBox bottom = new VBox(form, buttons);
+        browseCsv.setOnAction(e -> browseCsv());
+        importCsv.setOnAction(e -> startImport());
+        csvPath.setPrefWidth(320);
+        HBox csvBox = new HBox(8, new Label("CSV-файл"), csvPath, browseCsv, importCsv);
+        csvBox.setPadding(new Insets(8));
+        progress.setPrefWidth(220);
+        HBox progressBox = new HBox(8, progress, status);
+        progressBox.setPadding(new Insets(0, 8, 8, 8));
+
+        VBox bottom = new VBox(form, buttons, csvBox, progressBox);
         BorderPane root = new BorderPane();
         root.setCenter(table);
         root.setBottom(bottom);
@@ -182,48 +202,84 @@ public class SitesTab extends Tab {
 
     // ---------------------------------------------------------------- імпорт CSV
 
-    private void importCsv() {
+    private void browseCsv() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Оберіть CSV-файл із майданчиками");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
-        // відносний шлях sample-data/container_sites.csv: програму запускають з каталогу client/
+        // відносний шлях sample-data/...: програму запускають з каталогу client/
         File dir = CsvSiteReader.DEFAULT_FILE.getParent().toFile();
         if (dir.isDirectory()) {
             chooser.setInitialDirectory(dir);
-            chooser.setInitialFileName(CsvSiteReader.DEFAULT_FILE.getFileName().toString());
         }
         File file = chooser.showOpenDialog(getTabPane() == null ? null : getTabPane().getScene().getWindow());
-        if (file == null) {
+        if (file != null) {
+            csvPath.setText(file.getPath());
+        }
+    }
+
+    /** Запускає імпорт у фоновому потоці; поки він триває, повторний запуск заблоковано. */
+    private void startImport() {
+        String text = csvPath.getText() == null ? "" : csvPath.getText().trim();
+        if (text.isEmpty()) {
+            UiUtil.showWarning("Вкажіть шлях до CSV-файлу");
             return;
         }
-
-        CsvSiteReader.Result parsed;
+        Path file;
         try {
-            parsed = new CsvSiteReader().read(file.toPath());
-        } catch (IOException e) {
-            UiUtil.showWarning("Не вдалося прочитати файл: " + e.getMessage());
+            file = Path.of(text);
+        } catch (InvalidPathException e) {
+            UiUtil.showWarning("Некоректний шлях до файла");
             return;
         }
 
-        List<String> problems = new ArrayList<>(parsed.getErrors());
-        int imported = 0;
-        for (CsvSiteReader.Row row : parsed.getRows()) {
-            try {
-                api.addSite(row.getSite());
-                imported++;
-            } catch (ApiException e) {
-                problems.add("Рядок " + row.getLine() + ": " + e.getMessage());
+        ImportSitesTask task = new ImportSitesTask(file, api);
+        progress.progressProperty().bind(task.progressProperty());
+        status.textProperty().bind(task.messageProperty());
+        setImportRunning(true);
+
+        task.setOnSucceeded(e -> {
+            unbindImport();
+            int imported = task.getValue();
+            List<String> problems = task.getProblems();
+            progress.setProgress(imported + problems.size() > 0 ? 1.0 : 0.0);
+            status.setText(imported == 0 && problems.isEmpty()
+                    ? "Немає рядків для імпорту"
+                    : "Готово. Імпортовано: " + imported + ", пропущено: " + problems.size());
+            refresh();
+            if (!problems.isEmpty()) {
+                showImportReport(imported, problems);
             }
-        }
-        refresh();
-        showImportReport(imported, problems);
+        });
+        task.setOnFailed(e -> {
+            unbindImport();
+            Throwable error = task.getException();
+            LOG.log(Level.WARNING, "CSV-імпорт завершився помилкою", error);
+            status.setText("Помилка імпорту");
+            refresh(); // сервер міг прийняти частину записів до збою
+            String message = error == null || error.getMessage() == null
+                    ? "Невідома помилка імпорту" : error.getMessage();
+            UiUtil.showError(message);
+        });
+
+        Thread thread = new Thread(task, "csv-import");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    /** Знімає прив'язки до Task: після bind() властивості не можна змінювати вручну. */
+    private void unbindImport() {
+        progress.progressProperty().unbind();
+        status.textProperty().unbind();
+        setImportRunning(false);
+    }
+
+    private void setImportRunning(boolean running) {
+        importCsv.setDisable(running);
+        browseCsv.setDisable(running);
+        csvPath.setDisable(running);
     }
 
     private void showImportReport(int imported, List<String> problems) {
-        if (problems.isEmpty()) {
-            UiUtil.showInfo("Імпортовано майданчиків: " + imported);
-            return;
-        }
         TextArea area = new TextArea("Імпортовано: " + imported + "\nПропущено: " + problems.size()
                 + "\n\n" + String.join("\n", problems));
         area.setEditable(false);

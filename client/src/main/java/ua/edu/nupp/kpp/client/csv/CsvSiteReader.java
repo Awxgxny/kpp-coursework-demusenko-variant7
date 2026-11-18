@@ -2,23 +2,19 @@ package ua.edu.nupp.kpp.client.csv;
 
 import ua.edu.nupp.kpp.client.model.ContainerSite;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Читання CSV з контейнерними майданчиками.
+ * Формат CSV з контейнерними майданчиками та розбір одного рядка.
  *
  * Формат: UTF-8, роздільник ';', перший рядок — заголовок, далі по одному майданчику в рядку:
  * code;name;address;district;waste_type;container_count;capacity_l;fill_level;sanitary_risk
  *
- * Клієнт перевіряє лише формат (кількість стовпців, порожні поля, числа). Предметні правила
- * (діапазони, унікальність коду, допустимі типи відходів) перевіряє сервер.
+ * Клієнт перевіряє лише формат (заголовок, кількість стовпців, порожні поля, числа). Предметні
+ * правила (діапазони, унікальність коду, допустимі типи відходів) перевіряє сервер.
+ * Читання файла й передавання записів на сервер виконує {@link ImportSitesTask}.
  */
-public class CsvSiteReader {
+public final class CsvSiteReader {
 
     public static final String DELIMITER = ";";
     public static final int COLUMNS = 9;
@@ -30,58 +26,7 @@ public class CsvSiteReader {
     /** Файл за замовчуванням: відносний шлях від каталогу запуску клієнта (client/). */
     public static final Path DEFAULT_FILE = Path.of("sample-data", "container_sites.csv");
 
-    /** Результат читання: коректні за форматом рядки та повідомлення про помилкові. */
-    public static class Result {
-        private final List<Row> rows = new ArrayList<>();
-        private final List<String> errors = new ArrayList<>();
-
-        public List<Row> getRows() {
-            return rows;
-        }
-
-        public List<String> getErrors() {
-            return errors;
-        }
-    }
-
-    /** Майданчик із номером рядка у файлі (для повідомлень про помилки). */
-    public static class Row {
-        private final int line;
-        private final ContainerSite site;
-
-        public Row(int line, ContainerSite site) {
-            this.line = line;
-            this.site = site;
-        }
-
-        public int getLine() {
-            return line;
-        }
-
-        public ContainerSite getSite() {
-            return site;
-        }
-    }
-
-    public Result read(Path file) throws IOException {
-        List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-        Result result = new Result();
-        for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            if (i == 0) {
-                line = stripBom(line);
-            }
-            if (i == 0 || line.isBlank()) {
-                continue; // заголовок та порожні рядки пропускаємо
-            }
-            int number = i + 1;
-            try {
-                result.rows.add(new Row(number, parseLine(line)));
-            } catch (IllegalArgumentException e) {
-                result.errors.add("Рядок " + number + ": " + e.getMessage());
-            }
-        }
-        return result;
+    private CsvSiteReader() {
     }
 
     /**
@@ -97,6 +42,12 @@ public class CsvSiteReader {
         }
     }
 
+    /**
+     * Перетворює рядок даних на майданчик.
+     *
+     * @throws IllegalArgumentException якщо кількість полів не дорівнює 9, є порожнє поле
+     *                                  або число записане некоректно
+     */
     public static ContainerSite parseLine(String line) {
         String[] f = line.split(DELIMITER, -1);
         if (f.length != COLUMNS) {
@@ -137,7 +88,7 @@ public class CsvSiteReader {
         }
     }
 
-    private static String stripBom(String s) {
+    static String stripBom(String s) {
         return s.startsWith("﻿") ? s.substring(1) : s;
     }
 }
