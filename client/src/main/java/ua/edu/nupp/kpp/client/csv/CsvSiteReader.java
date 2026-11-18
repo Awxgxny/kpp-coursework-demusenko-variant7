@@ -23,6 +23,10 @@ public class CsvSiteReader {
     public static final String DELIMITER = ";";
     public static final int COLUMNS = 9;
 
+    /** Затверджений заголовок: назви та порядок стовпців. */
+    public static final String EXPECTED_HEADER =
+            "code;name;address;district;waste_type;container_count;capacity_l;fill_level;sanitary_risk";
+
     /** Файл за замовчуванням: відносний шлях від каталогу запуску клієнта (client/). */
     public static final Path DEFAULT_FILE = Path.of("sample-data", "container_sites.csv");
 
@@ -80,7 +84,20 @@ public class CsvSiteReader {
         return result;
     }
 
-    static ContainerSite parseLine(String line) {
+    /**
+     * Перевіряє перший рядок файла. Початковий маркер UTF-8 (BOM), який додає Excel, ігнорується.
+     *
+     * @throws IllegalArgumentException якщо заголовок не збігається із затвердженим
+     */
+    public static void checkHeader(String header) {
+        String actual = stripBom(header).trim();
+        if (!EXPECTED_HEADER.equals(actual)) {
+            throw new IllegalArgumentException("Неправильний заголовок CSV. Очікується: "
+                    + EXPECTED_HEADER + "; знайдено: " + actual);
+        }
+    }
+
+    public static ContainerSite parseLine(String line) {
         String[] f = line.split(DELIMITER, -1);
         if (f.length != COLUMNS) {
             throw new IllegalArgumentException("очікується " + COLUMNS + " полів, знайдено " + f.length);
